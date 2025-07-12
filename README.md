@@ -1,115 +1,124 @@
-Expense Tracker Dashboard
-A full-stack web application for tracking personal expenses, with a focus on SQL data modeling and complex queries. Built using PostgreSQL for the database, Flask for the backend, and Bootstrap/HTML/JS for the frontend. Features include adding/editing/deleting expenses, monthly aggregations with charts, and user authentication.
+# Expense Tracker Dashboard
 
-Features
-CRUD Operations: Add, edit, and delete expense entries (date, amount, category, description).
-Dashboard Visuals: Monthly spending by category displayed in a table and pie chart (using Chart.js).
-Recent Expenses: List of recent expenses with edit/delete buttons.
-Authentication: User login/logout to ensure data privacy (each user sees only their expenses).
-SQL Proficiency: Uses advanced queries like GROUP BY, JOIN, EXTRACT for date parts, and parameterized statements for security.
-Tech Stack
-Database: PostgreSQL (SQL for schema, queries, aggregations).
-Backend: Python with Flask (API routes for CRUD, authentication with Flask-Login and Bcrypt).
-Frontend: HTML/CSS/JavaScript with Bootstrap (responsive UI) and Chart.js (visualizations).
-Other: python-dotenv for environment variables, psycopg2 for DB connection.
-Prerequisites
-Python 3.8+
-PostgreSQL installed and running.
-Basic knowledge of terminal commands.
-Local Setup Instructions
-Clone the Repository:
-text
+A full-stack web application for managing personal expenses, featuring user authentication, data visualizations, and secure PostgreSQL integration. Built with Flask, PostgreSQL, and Bootstrap, this project demonstrates practical use of SQL aggregations, backend routing, and frontend chart rendering.
 
-Collapse
+## 🔗 Live Demo
+👉 [View Deployed App on Render](https://your-render-url.onrender.com)  
+*(Login credentials below)*
 
-Wrap
+## Tech Stack
+- **Database**: PostgreSQL (schema design, secure parameterized queries, aggregations)
+- **Backend**: Python, Flask, Flask-Login, Bcrypt
+- **Frontend**: HTML, CSS, JavaScript, Bootstrap, Chart.js
+- **Other Tools**: python-dotenv, psycopg2
 
-Copy
-git clone https://github.com/yourusername/your-repo-name.git
-cd your-repo-name
-Set Up Virtual Environment:
-text
+## Features
+- **CRUD Operations**: Add, edit, and delete expenses (date, amount, category, description)
+- **Dashboard Visuals**: Pie chart and table showing monthly spend by category (via Chart.js)
+- **Recent Expenses**: View latest entries with inline edit/delete actions
+- **Authentication**: Secure login/logout (users only see their own expenses)
+- **SQL Proficiency**: Advanced queries using `JOIN`, `GROUP BY`, `EXTRACT`, and parameterized statements
 
-Collapse
+## Prerequisites (for local setup)
+- Python 3.8+
+- PostgreSQL installed and running
+- Basic familiarity with terminal/command line
 
-Wrap
+## Local Setup Instructions
 
-Copy
+### 1. Clone the Repository
+```bash
+git clone https://github.com/yourusername/expense-tracker-dashboard.git
+cd expense-tracker-dashboard
+```
+
+### 2. Set Up Virtual Environment
+```bash
 python -m venv venv
 .\venv\Scripts\activate  # On Windows
-# source venv/bin/activate  # On macOS/Linux
+# OR
+source venv/bin/activate  # On macOS/Linux
+
 pip install -r requirements.txt
-Set Up PostgreSQL Database:
-Create a user and database (if not already done):
-text
+```
 
-Collapse
-
-Wrap
-
-Copy
+### 3. Set Up PostgreSQL Database
+```sql
 psql -U postgres
 CREATE USER expense_user WITH PASSWORD 'your_password';
 CREATE DATABASE expense_tracker;
 GRANT ALL PRIVILEGES ON DATABASE expense_tracker TO expense_user;
 \q
-Run the SQL script to create tables and sample data:
-text
+```
 
-Collapse
-
-Wrap
-
-Copy
+Run the SQL script to create tables and insert sample data:
+```bash
 psql -U expense_user -d expense_tracker -f expense_tracker.sql
-(Enter the password when prompted. This drops existing tables if they exist and inserts sample users/expenses.)
-Configure Environment Variables:
-Create a .env file in the root:
-text
+```
 
-Collapse
+### 4. Configure Environment Variables
 
-Wrap
-
-Copy
+Create a `.env` file in the project root:
+```env
 DB_USER=expense_user
 DB_PASSWORD=your_password
 DB_NAME=expense_tracker
 DB_HOST=localhost
-Run the Application:
-text
+```
 
-Collapse
-
-Wrap
-
-Copy
+### 5. Run the Application
+```bash
 python app.py
-Visit http://localhost:5000/ in your browser.
-You'll be redirected to the login page.
-Sample Login Credentials
-Use these to log in (created in expense_tracker.sql):
+```
 
-Username: john_doe | Password: password1 (plain text—do not use the hashed value from the SQL script; the app hashes it during comparison).
-Username: jane_smith | Password: password2
-Note: Passwords are stored as bcrypt hashes in the database for security. The plain text passwords above are for demo purposes only. In a production app, users would register with their own credentials.
+Visit `http://localhost:5000` in your browser.
 
-Usage
-Log in with sample credentials.
-Add expenses via the form—they appear in the recent table and update monthly totals/chart.
-Edit/delete from the recent table (edit uses a simple prompt for new amount; customizable).
-Logout via the button.
-Screenshots
-Login Page: [Add screenshot here]
-Dashboard: [Add screenshot here, showing table and chart]
-Deployment (Optional)
-Deploy to Render.com for a live demo:
+## Sample Login Credentials
 
-Push to GitHub.
-On Render: New Web Service > Connect repo.
-Settings: Runtime Python, Build pip install -r requirements.txt, Start gunicorn app:app.
-Add env vars from .env.
-Add PostgreSQL database, run SQL script via Render console.
-Get the URL and test.
-License
-MIT License. See LICENSE file for details.
+These accounts are preloaded via the SQL seed file:
+
+| Username    | Password   |
+|-------------|------------|
+| john_doe    | password1  |
+| jane_smith  | password2  |
+
+> 🔒 Passwords are hashed using Bcrypt. These demo credentials are for testing only.
+
+## Usage
+- Log in with a sample user
+- Add new expenses via the input form
+- Review entries in the recent transactions table
+- View monthly totals and breakdown by category (chart)
+- Edit or delete expenses inline
+- Logout to end session
+
+## Screenshots
+> *(Replace these with actual image links if stored in the repo)*
+
+- **Login Page**  
+  `![Login Page](screenshots/login.png)`
+
+- **Dashboard View**  
+  `![Dashboard](screenshots/dashboard.png)`
+
+## Deployment (Live Version)
+
+The live version of this app is hosted on [Render.com](https://render.com).
+
+- Backend runs on a Python web service using Gunicorn
+- Environment variables securely configured
+- PostgreSQL database hosted through Render’s integrated service
+- Demo SQL data auto-seeded for convenience
+
+To access the deployed version:
+1. Visit the [Live Demo](https://your-render-url.onrender.com)
+2. Use the provided credentials to log in
+3. Explore functionality, including expense tracking, charting, and session-based login
+
+> 📝 If the Render service is “spinning up” after inactivity, please allow a few seconds for the backend to fully start.
+
+## License
+This project is open-source under the [MIT License](LICENSE).
+
+## Author
+Developed by Jossell Araiza on July 10, 2025.
