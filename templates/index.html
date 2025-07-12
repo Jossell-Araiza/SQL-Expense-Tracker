@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Expense Tracker Dashboard</h1>
+        <a href="/logout" class="btn btn-secondary float-end">Logout</a>
+        
+        <!-- Add Expense Form -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Add New Expense</h5>
+                <form id="expenseForm">
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select class="form-select" id="category" required>
+                            <option value="1">Food</option>
+                            <option value="2">Transportation</option>
+                            <option value="3">Entertainment</option>
+                            <option value="4">Bills</option>
+                            <option value="5">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="amount" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="expenseDate" class="form-label">Date</label>
+                        <input type="date" class="form-control" id="expenseDate" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="description">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Expense</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Monthly Spending Table -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Monthly Spending by Category</h5>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Year</th>
+                            <th>Month</th>
+                            <th>Total Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="spendingTable"></tbody>
+                </table>
+                <canvas id="spendingChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Recent Expenses Table -->
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Recent Expenses</h5>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // @ts-ignore
+        const userId = {{ user_id }};
+
+        // Fetch and display monthly spending with chart
+        async function loadSpendingData() {
+            try {
+                const response = await fetch(`/api/spending/${userId}`);
+                if (!response.ok) throw new Error('API error');
+                const data = await response.json();
+                const tbody = document.getElementById('spendingTable');
+                tbody.innerHTML = '';
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.category}</td>
+                        <td>${row.year}</td>
+                        <td>${row.month}</td>
+                        <td>$${parseFloat(row.total_amount).toFixed(2)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                // Add pie chart
+                const labels = data.map(row => row.category);
+                const amounts = data.map(row => parseFloat(row.total_amount));
+                const ctx = document.getElementById('spendingChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: amounts,
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+                        }]
+                    },
+                    options: { responsive: true }
+                });
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        // Fetch and display recent expenses
+        async function loadRecentExpenses() {
+            try {
+                const response = await fetch(`/api/expenses/${userId}`);
+                if (!response.ok) throw new Error('API error');
+                const data = await response.json();
+                const tbody = document.getElementById('recentTable');
+                tbody.innerHTML = '';
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.category}</td>
+                        <td>$${parseFloat(row.amount).toFixed(2)}</td>
+                        <td>${row.expense_date}</td>
+                        <td>${row.description}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning edit-btn" data-id="${row.expense_id}">Edit</button>
+                            <button class="btn btn-sm btn-danger delete-btn" data-id="${row.expense_id}">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                // Add event listeners for buttons
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const id = btn.dataset.id;
+                        await fetch(`/api/expenses/${id}?user_id=${userId}`, { method: 'DELETE' });
+                        loadRecentExpenses();
+                        loadSpendingData();
+                    });
+                });
+                // Edit logic (simple prompt for demo; expand for modal)
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const id = btn.dataset.id;
+                        const newAmount = prompt('New amount:');
+                        if (newAmount) {
+                            await fetch(`/api/expenses/${id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ user_id: userId, amount: parseFloat(newAmount), description: 'Updated', category_id: 1, expense_date: '2025-07-01' })  // Hardcoded; customize
+                            });
+                            loadRecentExpenses();
+                            loadSpendingData();
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading recent expenses:', error);
+            }
+        }
+
+        // Handle add expense form
+        document.getElementById('expenseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const expense = {
+                user_id: userId,
+                category_id: document.getElementById('category').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                expense_date: document.getElementById('expenseDate').value,
+                description: document.getElementById('description').value
+            };
+            try {
+                await fetch('/api/expenses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(expense)
+                });
+                loadSpendingData();  // Refresh monthly table and chart
+                loadRecentExpenses();  // Refresh recent table
+                e.target.reset();
+            } catch (error) {
+                console.error('Error adding expense:', error);
+            }
+        });
+
+        // Load data on page load
+        loadSpendingData();
+        loadRecentExpenses();
+    </script>
+</body>
+</html>
