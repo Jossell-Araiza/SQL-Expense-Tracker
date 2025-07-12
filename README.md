@@ -121,4 +121,4 @@ To access the deployed version:
 This project is open-source under the [MIT License](LICENSE).
 
 ## Author
-Developed by Jossell Araiza on July 10, 2025.
+Developed by Jossell Araiza on July 11, 2025.
